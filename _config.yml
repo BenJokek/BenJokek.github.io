@@ -12,7 +12,6 @@ baseurl: '/blog'
 # otherwise, the layout language will use the default value of 'en'.
 lang: en
 
-
 # Change to your timezone › http://www.timezoneconverter.com/cgi-bin/findzone/findzone
 timezone:
 
@@ -81,7 +80,7 @@ theme_mode:   # [light|dark]
 img_cdn:
 
 # the avatar on sidebar, support local or CORS resources
-avatar:
+avatar: './me.jpg'
 
 # boolean type, the global switch for ToC in posts.
 toc: true
