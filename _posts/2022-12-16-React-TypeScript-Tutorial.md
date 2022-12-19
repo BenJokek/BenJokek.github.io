@@ -460,8 +460,8 @@ Until now I've been declaring the types above components but you can also import
 // Person.types.ts
 export type PersonProps = {
   name: {
-    first: string
-    last: string
+    first: string;
+    last: string;
   };
 };
 ```
@@ -478,8 +478,11 @@ export const Person = ({ name }: PersonProps) => {
   );
 };
 ```
+
 ## useState Hook
-I didn't write a single line of TypeScript code explicitly but anyways this is a completely valid function component. Because *type inference* if you try to change for example the "false" value by "0" in the handleLogout function, an error arise.
+
+I didn't write a single line of TypeScript code explicitly but anyways this is a completely valid function component. Because _type inference_ if you try to change for example the "false" value by "0" in the handleLogout function, an error arise.
+
 ```react
 // LoggedIn.tsx
 import { useState } from "react";
@@ -502,8 +505,11 @@ export const LoggedIn = () => {
   );
 };
 ```
+
 ### useState Future Value
+
 Now we have to expecify type explicitly and not rely in type inference. useState has the default value of "null" because by default the user is not logged in and when they log in setState has to accept an object with the user data. We use the type AuthUser for that. TypeScript will complain if we don't write the "?" to mark the value as optional, because sure it can be "null". (This is a hard coded example).
+
 ```react
 // User.tsx
 import { useState } from "react";
@@ -536,7 +542,9 @@ export const LoggedIn = () => {
   );
 };
 ```
+
 ### useState Type Assertion
+
 We could also ly to TypeScript saying that an empty object is of type AuthUser with the keyword "as". If you're confident that user will be initialized soon after setup and will always have a value after, you can use type assertion. If not just leave it like before.
 
 ```react
@@ -567,7 +575,9 @@ export const LoggedIn = () => {
   );
 };
 ```
+
 ## useReducer Hook
+
 ```react
 // Counter.tsx
 import { useReducer } from "react";
@@ -619,6 +629,7 @@ export const Counter = () => {
   );
 };
 ```
+
 ## useContext Hook
 
 ```react
@@ -638,6 +649,7 @@ function App() {
 
 export default App;
 ```
+
 ```typescript
 //theme.ts
 export const theme = {
@@ -651,6 +663,7 @@ export const theme = {
   },
 };
 ```
+
 ```react
 //ThemeContext.tsx
 import { createContext } from "react";
@@ -668,6 +681,7 @@ export const ThemeContextProvider = ({children}: ThemeContextProviderProps) => {
   );
 };
 ```
+
 ```react
 //Box.tsx
 import { useContext } from "react";
@@ -687,7 +701,9 @@ export const Box = () => {
   );
 };
 ```
+
 ### useContext Future Value
+
 ```react
 // App.tsx
 import { UserContextProvider } from "./components/context/UserContext";
@@ -705,6 +721,7 @@ function App() {
 
 export default App;
 ```
+
 ```react
 // UserContextProvider.tsx
 import { useState, createContext } from "react";
@@ -736,6 +753,7 @@ export const UserContextProvider = ({ children }: UserContextProviderProps) => {
 };
 
 ```
+
 ```react
 // User.tsx
 import { useContext } from "react";
@@ -768,8 +786,11 @@ export const User = () => {
   );
 };
 ```
+
 ## useRef Hook
+
 ### DOM references
+
 ```react
 // DomRef.tsx
 import { useRef, useEffect } from "react";
@@ -791,6 +812,7 @@ export const DomRef = () => {
   );
 };
 ```
+
 ### MUTABLE references
 
 ```react
@@ -822,7 +844,9 @@ export const MutableRef = () => {
   );
 };
 ```
+
 ## Class Component
+
 ```react
 // App.tsx
 import { Counter } from "./components/class/Counter";
@@ -837,6 +861,7 @@ function App() {
 
 export default App;
 ```
+
 ```react
 // Counter.tsx
 import { Component } from "react";
@@ -870,7 +895,9 @@ export class Counter extends Component<CounterProps, CounterState> {
   }
 }
 ```
+
 ## Component Prop
+
 ```react
 // App.tsx
 import { Private } from "./components/auth/Private";
@@ -885,6 +912,7 @@ function App() {
 }
 export default App;
 ```
+
 ```react
 //Profile.tsx
 export type ProfileProps = {
@@ -895,12 +923,14 @@ export const Profile = ({ name }: ProfileProps) => {
   return <div>Private profile component. Name is {name}</div>;
 };
 ```
+
 ```react
 //Login.tsx
 export const Login = () => {
   return <div>Please login to continue</div>;
 };
 ```
+
 ```react
 //Private.tsx
 import { Login } from "./Login";
@@ -917,5 +947,194 @@ export const Private = ({ isLoggedIn, component: Component }: PrivateProps) => {
   } else {
     return <Login />;
   }
+};
+```
+
+## Restricting Props
+
+```react
+//App.tsx
+import { RandomNumber } from "./components/restriction/RandomNumber";
+function App() {
+  return (
+    <div className="App">
+      <RandomNumber value={19} isPositive /> {/*isPositive is inferred to be true */}
+      <RandomNumber value={19} isPositive isNegative Zero /> {/*ERROR*/}
+    </div>
+  );
+}
+
+export default App;
+```
+
+```react
+//RandomNumbers.tsx
+type RandomNumberType = {
+  value: number
+};
+
+type PositiveNumber = RandomNumberType & {
+  isPositive: boolean
+  isNegative?: never
+  isZero?: never
+};
+
+type NegativeNumber = RandomNumberType & {
+  isNegative: boolean
+  isPositive?: never
+  isZero?: never
+};
+
+type Zero = RandomNumberType & {
+  isZero: boolean
+  isPositive?: never
+  isNegative?: never
+};
+
+type RandomNumberProps = PositiveNumber | NegativeNumber | Zero;
+
+export const RandomNumber = ({
+  value,
+  isPositive,
+  isNegative,
+  isZero,
+}: RandomNumberProps) => {
+  return (
+    <div>
+      {value} {isPositive && "positive"} {isNegative && "negative"}
+      {isZero && "zero"}
+    </div>
+  );
+};
+
+```
+
+## Template Literals and Exclude
+
+```react
+// App.tsx
+import { Toast } from "./components/templateLiterals/Toast";
+function App() {
+  return (
+    <div className="App">
+      <Toast position="right-center"/>
+      <Toast position="center"/> {/* We can write just center */}
+      <Toast position="center-center"/> {/* ERROR */}
+    </div>
+  );
+}
+
+export default App;
+```
+
+```react
+//Toast.tsx
+type HorizontalPosition = "left" | "center" | "right";
+type VerticalPosition = "top" | "center" | "bottom";
+
+type ToastProps = {
+  position:
+    | Exclude<`${HorizontalPosition}-${VerticalPosition}`, "center-center">
+    | "center";
+};
+
+export const Toast = ({ position }: ToastProps) => {
+  return <div>Toast Notification Position - {position}</div>;
+};
+```
+
+## Wrapping HTML Elements
+
+```react
+// App.tsx
+import { CustomButton } from "./components/html/Button";
+function App() {
+  return (
+    <div className="App">
+      <CustomButton variant="primary" onClick={() => console.log("Clicked")}>
+        Primary Button
+      </CustomButton>
+    </div>
+  );
+}
+
+export default App;
+```
+
+```react
+//CustomButton.tsx
+type ButtonProps = {
+  variant: "primary" | "secondary"
+  children: string
+} & Omit<React.ComponentProps<"button">, "children">;
+
+export const CustomButton = ({ variant, children, ...rest }: ButtonProps) => {
+  return (
+    <button className={`class-with-${variant}`} {...rest}>
+      {children}
+    </button>
+  );
+};
+```
+
+## Extracting a Components Prop Types
+
+You might want to reuse a components props types but you don't have acces to the type itself, perhaps it is from a library that you don't have access to. In such cases you can extract prop types of an existing component. This component needs the exact same props as the Greet component. It accepts three props: name, optional messageCount and isLoggedIn Although we could export greed props, let's assume we can't. In this case we can use React.ComponentProps to extract the props of the [Greet component](/posts/React-TypeScript-Tutorial#optional-and-default-props).
+
+```react
+// CustomComponent.tsx
+import { Greet } from "/Greet";
+
+export const CustomComponent = (props: React.ComponentProps<typeof Greet>) => {
+  return <div>{props.name}</div>;
+};
+```
+
+## Polymorphic Components
+
+```react
+// App.tsx
+import { Text } from "./components/polymorphic/Text";
+function App() {
+  return (
+    <div className="App">
+      <Text as="h1" size="lg">
+        Heading
+      </Text>
+      <Text as="p" size="md">
+        Paragraph
+      </Text>
+      <Text as="label" htmlFor="someId" size="sm" color="secondary">
+        Label
+      </Text>
+    </div>
+  );
+}
+
+export default App;
+```
+
+```react
+//Text.tsx
+type TextOwnProps<E extends React.ElementType> = {
+  size?: "sm" | "md" | "lg"
+  color?: "primary" | "secondary"
+  children: React.ReactNode
+  as?: E
+};
+
+type TextProps<E extends React.ElementType> = TextOwnProps<E> &
+  Omit<React.ComponentProps<E>, keyof TextOwnProps<E>>
+
+export const Text = <E extends React.ElementType = "div">({
+  size,
+  color,
+  children,
+  as,
+}: TextProps<E>) => {
+  const Component = as || "div";
+  return (
+    <Component className={`class-with-${size}-${color}`}>{children}</Component>
+  );
 };
 ```
