@@ -2,7 +2,7 @@
 title: React TypeScript Tutorial
 date: 2022-12-16
 categories: [React, TypeScript]
-tags: [React, TypeScript] # TAG names should always be lowercase
+tags: [react, typeScript] # TAG names should always be lowercase
 
 <author_id>:
   name: Benjamín Zambelli
