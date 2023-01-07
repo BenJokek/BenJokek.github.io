@@ -456,34 +456,6 @@ export default Counter;
 - Code has to be executed after the state has been updated? Place that code in the call back function wich is the second argument to the setState method.
 - When you have to update state based on the previous state value, pass in a function as an argument instead of the regular object.
 
-Using Functional Components looks kinda simpler:
-
-```react
-// CounterFunction.js
-import { useEffect, useState } from "react";
-
-const CounterFunction = (props) => {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    console.log("This code has to be executed after changing state", `You clicked ${count} times`);
-  }, [count]);
-
-  const increment = () => {
-    setCount(count + props.increment);
-  };
-
-  return (
-    <div>
-      <h1>{count}</h1>
-      <button onClick={increment}>Increment</button>
-    </div>
-  );
-};
-
-export default CounterFunction;
-```
-
 ## Destructuring props and state
 
 - Destructuring is an ES6 feature
