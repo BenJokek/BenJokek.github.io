@@ -1903,3 +1903,266 @@ export default HookTimer;
 
 Now everything works, this is another usage for useRef hook. It can be used to create a generic container which can hold a mutable value similar to instance properties on a class component. This generic container doesn't cause re-renders when the data stored changes. At the same time is also remembers the stored data even after other state variables caused a re-render of this component.
 
+## Custom Hooks
+
+* A Custom Hook is basically a JavaScript function whose name starts with "use".
+
+* Can also call other Hooks if required.
+
+Why do we want it?
+
+* Share logic between two or more components. Alternative to HOCS and Render Props.
+
+### Example
+
+We're gonna create a custom hook that updates the document title.
+
+1. First we're gonna create a counter and set the document title
+as we normally would without any custom hook.
+
+2. Second we're gonna see how to extract the logic into a custom hook
+
+```react
+import { useState, useEffect } from "react";
+
+function DocTitleOne() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    document.title = `Count ${count}`;
+  }, [count]);
+
+  return (
+    <div>
+      <button onClick={() => setCount(count + 1)}>COUNT - {count}</button>
+    </div>
+  );
+}
+
+export default DocTitleOne;
+```
+
+Let's suppose we'd wanna repeat that logic into multiple components. There would be a lot of repetition. Here is where a custom hook makes sense.
+
+In our current example we can create a custom hook that extracts the logic of updating the document title. We can then reuse the same custom hook in different components.
+
+I'm gonna create a new folder in "src" called "hooks" and there a file called "useDocumentTitle.js"
+
+```react
+import { useEffect } from "react";
+
+function useDocumentTitle(count) {
+  useEffect(() => {
+    document.title = `Count ${count}`;
+  }, [count]);
+}
+
+export default useDocumentTitle;
+```
+
+```react
+import { useState } from "react";
+import useDocumentTitle from "../hooks/useDocumentTitle";
+
+function DocTitleOne() {
+  const [count, setCount] = useState(0);
+
+  useDocumentTitle(count)
+
+  return (
+    <div>
+      <button onClick={() => setCount(count + 1)}>COUNT - {count}</button>
+    </div>
+  );
+}
+
+export default DocTitleOne;
+```
+
+Now we are saving us from code repetition, instead of using the useEffect we're using the hook.
+
+### Second Example
+
+Let's make a counter custom hook! Create a new file in hooks directory called "useCounter.js"
+
+This is how our component would look without reusing code:
+
+```react
+import { useState } from "react";
+
+export default function CoolCounter() {
+  const [count, setCount] = useState(0);
+
+  const increment = () => {
+    setCount((prevCount) => prevCount + 1);
+  };
+
+  const decrement = () => {
+    setCount((prevCount) => prevCount - 1);
+  };
+
+  const reset = () => {
+    setCount(0);
+  };
+
+  return (
+    <div>
+      <h2>Count = {count}</h2>
+      <button onClick={increment}>INCREMENT</button>
+      <button onClick={decrement}>DECREMENT</button>
+      <button onClick={reset}>RESET</button>
+    </div>
+  );
+}
+```
+
+Here we reuse the code by using the useCounter hook:
+
+```react
+import { useState } from "react";
+
+function useCounter(initialCount = 0, value) {
+  const [count, setCount] = useState(initialCount);
+
+  const increment = () => {
+    setCount((prevCount) => prevCount + value);
+  };
+  const decrement = () => {
+    setCount((prevCount) => prevCount - value);
+  };
+  const reset = () => {
+    setCount(initialCount);
+  };
+
+  return [count, increment, decrement, reset];
+}
+
+export default useCounter;
+```
+
+```react
+import useCounter from "../hooks/useCounter";
+
+export default function CoolCounter() {
+
+  const [count, increment, decrement, reset] = useCounter(5, 3);
+
+  return (
+    <div>
+      <h2>Count = {count}</h2>
+      <button onClick={increment}>INCREMENT</button>
+      <button onClick={decrement}>DECREMENT</button>
+      <button onClick={reset}>RESET</button>
+    </div>
+  );
+}
+```
+
+We just copy-pasted the logic again. Because the useCounter hook is returning the values and methods in an array we can use array destructuring in the CoolCounter component, AWESOME!
+
+Also you can specify a different initialCount (by default is 0, but I changed it to 5) and a value for incrementing and decrementing (I chose 3).
+
+## Third Example
+
+Let’s make an input custom hook! Create a new file in hooks directory called “useInput.js”
+
+This is how our component would look without reusing code:
+
+```react
+import { useState } from "react";
+
+function UserForm() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+
+  const submitHandler = (e) => {
+    e.preventDefault();
+    alert(`Hello ${firstName} ${lastName}`);
+  };
+
+  return (
+    <div>
+      <form onSubmit={submitHandler}>
+        <div>
+          <label>First name</label>
+          <input
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            type="text"
+          />
+        </div>
+        <div>
+          <label>Last name</label>
+          <input
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            type="text"
+          />
+        </div>
+        <button type="submit">SUBMIT</button>
+      </form>
+    </div>
+  );
+}
+
+export default UserForm;
+```
+
+Here we reuse the code by using the useInput hook:
+
+```react
+import { useState } from "react";
+
+function useInput(initialValue) {
+  const [value, setValue] = useState(initialValue);
+
+  const reset = () => {
+    setValue(initialValue);
+  };
+
+  const bind = {
+    value, // This is a short hand for "value: value"
+    onChange: (e) => {
+      setValue(e.target.value);
+    },
+  };
+
+  return [value, bind, reset];
+}
+
+export default useInput;
+```
+
+```react
+import useInput from "../hooks/useInput";
+
+function UserForm() {
+  const [firstName, bindFirstName, resetFirstName] = useInput("");
+  const [lastName, bindLastName, resetLastName] = useInput("");
+
+  const submitHandler = (e) => {
+    e.preventDefault();
+    alert(`Hello ${firstName} ${lastName}`);
+    resetFirstName();
+    resetLastName();
+  };
+
+  return (
+    <div>
+      <form onSubmit={submitHandler}>
+        <div>
+          <label>First name</label>
+          <input {...bindFirstName} type="text" />
+        </div>
+        <div>
+          <label>Last name</label>
+          <input {...bindLastName} type="text" />
+        </div>
+        <button type="submit">SUBMIT</button>
+      </form>
+    </div>
+  );
+}
+
+export default UserForm;
+```
