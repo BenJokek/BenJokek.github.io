@@ -2062,7 +2062,7 @@ We just copy-pasted the logic again. Because the useCounter hook is returning th
 
 Also you can specify a different initialCount (by default is 0, but I changed it to 5) and a value for incrementing and decrementing (I chose 3).
 
-## Third Example
+### Third Example
 
 Let’s make an input custom hook! Create a new file in hooks directory called “useInput.js”
 
